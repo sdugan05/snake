@@ -3,8 +3,8 @@
 #include <raylib.h>
 #include <stdio.h>
 
-#define ROWS 10
-#define COLS 10
+#define ROWS 20
+#define COLS 20
 #define CELL_SIZE 40
 
 typedef struct {
@@ -59,8 +59,8 @@ void snake_run(void) {
 
                                                                                 
 
-    InitWindow(400, 400, "Snake");
-    SetTargetFPS(4);
+    InitWindow(800, 800, "Snake");
+    SetTargetFPS(6);
     while(!WindowShouldClose())
     {
         BeginDrawing();
