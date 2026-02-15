@@ -1,56 +1,10 @@
 #include "snake.h"
-#include "util.h"
-#include <raylib.h>
-#include <stdio.h>
-
-#define ROWS 20
-#define COLS 20
-#define CELL_SIZE 40
-
-typedef struct {
-    u32 rows;
-    u32 cols;
-    u32 size;
-    u32 snake_init_pos;
-    b8 game_over;
-} game_config;
-
-typedef enum {
-    SNAKE,
-    APPLE,
-    EMPTY
-} cell_type;
-
-typedef struct {
-    u32 size;
-    i8 x_dir;
-    i8 y_dir;
-    u32* values;
-} Snake;
-
-typedef struct {
-    u32 rows;
-    u32 cols;
-    i32 apple;
-    cell_type* values;
-} Board;
-
-game_config* init_config(mem_arena* arena);
-
-Board* init_board(mem_arena* arena, game_config* config);
-
-Snake* init_snake(mem_arena* arena, game_config* config);
-
-void update_snake_dir(Snake* snake);
-
-void update(Board* board, Snake* snake, game_config* config);
-
-void draw(Board* board, Snake* snake, game_config* config);
 
 void snake_run(void) {
     printf("Hello from snake.c!\n");
 
                                                                                 
+
     mem_arena* game_arena = arena_create(GiB(1), MiB(1));
     game_config* config = init_config(game_arena);
     Board* board = init_board(game_arena, config);
@@ -59,7 +13,7 @@ void snake_run(void) {
 
                                                                                 
 
-    InitWindow(800, 800, "Snake");
+    InitWindow(800, 900, "Snake");
     SetTargetFPS(6);
     while(!WindowShouldClose())
     {
@@ -67,11 +21,30 @@ void snake_run(void) {
         ClearBackground(RAYWHITE);
         
         {
-            update(board, snake, config);
+            if (!config->game_over) {
+                update(board, snake, config);
+                DrawText(TextFormat("Score: %d", snake->size - 3), 20, 10, 40, BLACK);
+                DrawText(TextFormat("High Score: %d", config->high_score), 20, 50, 40, BLACK);
+            }
+            else {
+                printf("Game Over!\n");
+                config->high_score = MAX(config->score, config->high_score);
+                DrawText(TextFormat("Score: %d", snake->size - 3), 300, 10, 40, BLACK);
+                DrawText(TextFormat("High Score: %d", config->high_score), 300, 50, 40, BLACK);
+                DrawText("Game Over!", 20, 20, 40, RED);
+                DrawText("Press R to restart.", 400, 500, 60, RED);
+                if (IsKeyPressed(KEY_R)) {
+                    u32 high_score = config->high_score;
+                    arena_clear(game_arena);
+                    config = init_config(game_arena);
+                    board = init_board(game_arena, config);
+                    snake = init_snake(game_arena, config);
+                    config->high_score = high_score;
+                }
+            }
             draw(board, snake, config);
             if (config->game_over) {
-                printf("Game Over!\n");
-                return;
+                DrawText("Press R to restart.", 20, 500, 60, RED);
             }
         }
         
@@ -91,6 +64,8 @@ game_config* init_config(mem_arena* arena) {
     config->rows = ROWS;
     config->size = ROWS * COLS;
     config->game_over = false;
+    config->score = 0;
+    config->high_score = 0;
 
     return config;
 }
@@ -104,6 +79,7 @@ Board* init_board(mem_arena* arena, game_config* config) {
         board->values[i] = EMPTY;
     }
 
+    prng_seed((u32)time(0), 0);
     board->apple = 50;
 
     return board;
@@ -113,9 +89,9 @@ Snake* init_snake(mem_arena* arena, game_config* config) {
     Snake* snake = PUSH_STRUCT(arena, Snake);
     snake->values = PUSH_ARRAY(arena, u32, config->size);
 
-    snake->values[0] = 32;
-    snake->values[1] = 31;
-    snake->values[2] = 30;
+    snake->values[0] = 207;
+    snake->values[1] = 206;
+    snake->values[2] = 205;
 
     snake->size = 3;
 
@@ -188,12 +164,14 @@ void update(Board* board, Snake* snake, game_config* config) {
     if (board->apple == -1) {
         b8 done = false;
         while (!done) {
-            u32 new_apple_idx = prng_rand() & config->size;
+            u32 new_apple_idx = prng_rand() % config->size;
             if (board->values[new_apple_idx] != EMPTY) { break; }
             board->apple = new_apple_idx;
         }
     }
     board->values[board->apple] = APPLE;
+
+    config->score = snake->size - 3;
 }
 
 void draw(Board* board, Snake* snake, game_config* config) {
@@ -201,9 +179,9 @@ void draw(Board* board, Snake* snake, game_config* config) {
         u32 row = i / config->cols;
         u32 col = i % config->cols;
         switch (board->values[i]) {
-            case EMPTY: DrawRectangle(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE, (Color){0,0,0,255}); break;
-            case SNAKE: DrawRectangle(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE, (Color){0,220,0,255}); break;
-            case APPLE: DrawRectangle(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE, (Color){220,0,0,255}); break;
+            case EMPTY: DrawRectangle(col * CELL_SIZE, row * CELL_SIZE + 100, CELL_SIZE, CELL_SIZE, (Color){0,0,0,255}); break;
+            case SNAKE: DrawRectangle(col * CELL_SIZE, row * CELL_SIZE + 100, CELL_SIZE, CELL_SIZE, (Color){0,220,0,255}); break;
+            case APPLE: DrawRectangle(col * CELL_SIZE, row * CELL_SIZE + 100, CELL_SIZE, CELL_SIZE, (Color){220,0,0,255}); break;
         }
     }
 }
