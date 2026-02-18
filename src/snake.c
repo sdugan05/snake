@@ -13,7 +13,7 @@ void snake_run(void) {
 
                                                                                 
 
-    InitWindow(800, 900, "Snake");
+    InitWindow(1400, 900, "Snake");
     SetTargetFPS(6);
     while(!WindowShouldClose())
     {
@@ -23,16 +23,14 @@ void snake_run(void) {
         {
             if (!config->game_over) {
                 update(board, snake, config);
-                DrawText(TextFormat("Score: %d", snake->size - 3), 20, 10, 40, BLACK);
-                DrawText(TextFormat("High Score: %d", config->high_score), 20, 50, 40, BLACK);
+                DrawText(TextFormat("Score: %d", snake->size - 3), 300, 10, 40, BLACK);
+                DrawText(TextFormat("High Score: %d", config->high_score), 300, 50, 40, BLACK);
             }
             else {
                 printf("Game Over!\n");
                 config->high_score = MAX(config->score, config->high_score);
                 DrawText(TextFormat("Score: %d", snake->size - 3), 300, 10, 40, BLACK);
                 DrawText(TextFormat("High Score: %d", config->high_score), 300, 50, 40, BLACK);
-                DrawText("Game Over!", 20, 20, 40, RED);
-                DrawText("Press R to restart.", 400, 500, 60, RED);
                 if (IsKeyPressed(KEY_Q)) {
                     break;
                 }
@@ -47,7 +45,8 @@ void snake_run(void) {
             }
             draw(board, snake, config);
             if (config->game_over) {
-                DrawText("Press R to restart.", 20, 500, 60, RED);
+                DrawText("Game Over!", 180, 400, 80, RED);
+                DrawText("Press R to restart.", 80, 500, 60, RED);
             }
         }
         
