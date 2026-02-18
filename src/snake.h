@@ -20,11 +20,7 @@ typedef struct {
     u32 high_score;
 } game_config;
 
-typedef enum {
-    SNAKE,
-    APPLE,
-    EMPTY
-} cell_type;
+typedef enum { SNAKE, APPLE, EMPTY } cell_type;
 
 typedef struct {
     u32 size;

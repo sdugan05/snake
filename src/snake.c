@@ -33,6 +33,9 @@ void snake_run(void) {
                 DrawText(TextFormat("High Score: %d", config->high_score), 300, 50, 40, BLACK);
                 DrawText("Game Over!", 20, 20, 40, RED);
                 DrawText("Press R to restart.", 400, 500, 60, RED);
+                if (IsKeyPressed(KEY_Q)) {
+                    break;
+                }
                 if (IsKeyPressed(KEY_R)) {
                     u32 high_score = config->high_score;
                     arena_clear(game_arena);
@@ -165,8 +168,9 @@ void update(Board* board, Snake* snake, game_config* config) {
         b8 done = false;
         while (!done) {
             u32 new_apple_idx = prng_rand() % config->size;
-            if (board->values[new_apple_idx] != EMPTY) { break; }
+            if (board->values[new_apple_idx] != EMPTY) { continue; }
             board->apple = new_apple_idx;
+            done = true;
         }
     }
     board->values[board->apple] = APPLE;
